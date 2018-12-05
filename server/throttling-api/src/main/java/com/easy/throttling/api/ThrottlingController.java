@@ -26,7 +26,7 @@ public class ThrottlingController implements ThrottleAble {
    */
   @GetMapping(value = "/")
   @ResponseBody
-  @Throttling(value = 10)
+  @Throttling(value = 50)
   public ResponseEntity<String> get() throws IOException {
     return ResponseEntity.ok()
         .header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_HTML_VALUE)
