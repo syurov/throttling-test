@@ -1,0 +1,12 @@
+*.sass-cache
+*.idea
+*.iml
+target/
+*.log
+.orig
+
+/tomcat
+currentWork/
+throttling-dir/
+MANIFEST.MF
+
