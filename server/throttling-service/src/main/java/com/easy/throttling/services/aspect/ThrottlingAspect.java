@@ -1,7 +1,6 @@
 package com.easy.throttling.services.aspect;
 
-import com.easy.throttling.common.anatation.Throttling;
-import com.easy.throttling.common.dto.ThrottlingMethodsMap;
+import com.easy.throttling.common.annotations.Throttling;
 import com.easy.throttling.common.exceptions.ThrottlingOverException;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -12,7 +11,8 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import java.util.Calendar;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentMap;
 
@@ -25,7 +25,7 @@ public class ThrottlingAspect {
       , defaultImpl = ThrottlingMethodsMap.class)
   public static ConcurrentMap<String, LinkedList<Long>> throttlingMethods;
 
-  @Pointcut("@annotation(com.easy.throttling.common.anatation.Throttling)")
+  @Pointcut("@annotation(com.easy.throttling.common.annotations.Throttling)")
   public void annotationThrottling() {
   }
 
@@ -40,23 +40,29 @@ public class ThrottlingAspect {
 
     throttlingMethods.putIfAbsent(joinPoint.getSignature().getName(), new LinkedList<>());
 
-    Calendar instance = Calendar.getInstance();
-    long time = instance.getTime().getTime();
-    instance.add(Calendar.MINUTE, -1);
-    long expired = instance.getTime().getTime();
+    long time = new Date().getTime();
+    long expired = time - 60000;
 
 
-    LinkedList<Long> longs = throttlingMethods.computeIfPresent(joinPoint.getSignature().getName(), (k, v) -> {
+    LinkedList<Long> longs = throttlingMethods.computeIfPresent(joinPoint.getSignature().getName(),
+        (k, v) -> {
 
-      // delete form list
-      v.removeIf(x -> x < expired);
+          // Удаляем сначал списка, как только дошли до первого не истекшего времени, то выходим из цикла
+          // остальные точно не истекли
+          final Iterator<Long> each = v.iterator();
+          while (each.hasNext()) {
+            if (each.next() < expired) {
+              each.remove();
+            } else
+              break;
+          }
 
-      if (v.size() < annotation.value()) {
-        v.add(time);
-      }
+          if (v.size() < annotation.value()) {
+            v.add(time);
+          }
 
-      return v;
-    });
+          return v;
+        });
 
     if (longs.size() >= annotation.value())
       throw new ThrottlingOverException("Limit of calls is exceeded");

@@ -1,4 +1,4 @@
-package com.easy.throttling.common.dto;
+package com.easy.throttling.services.aspect;
 
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;

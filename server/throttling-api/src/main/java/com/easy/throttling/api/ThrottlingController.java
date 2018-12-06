@@ -1,6 +1,6 @@
 package com.easy.throttling.api;
 
-import com.easy.throttling.common.anatation.Throttling;
+import com.easy.throttling.common.annotations.Throttling;
 import com.easy.throttling.common.exceptions.ThrottlingOverException;
 import com.easy.throttling.common.interfaces.services.ThrottleAble;
 import org.springframework.http.HttpHeaders;
