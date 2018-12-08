@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 @Component
@@ -49,13 +50,14 @@ public class ThrottlingAspect {
 
           // Удаляем сначал списка, как только дошли до первого не истекшего времени, то выходим из цикла
           // остальные точно не истекли
-          final Iterator<Long> each = v.iterator();
-          while (each.hasNext()) {
-            if (each.next() < expired) {
-              each.remove();
-            } else
-              break;
-          }
+
+            final Iterator<Long> each = v.iterator();
+            while (each.hasNext()) {
+              if (each.next() < expired) {
+                each.remove();
+              } else
+                break;
+            }
 
           if (v.size() < annotation.value()) {
             v.add(time);
